@@ -10,6 +10,7 @@ api_key = "c44e7e216f79b38a6f84e497191ca830"
 
 
 def solve_captcha():
+    print("SOLVING CAPTCHAAAAAAAAA!!!! :_))))))))))")
     captcha_url = "https://www.google.com/recaptcha/api2/userverify?k=6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm"
     data = {
         'v': 'qc5B-qjP0QEimFYUxcpWJy5B',
@@ -20,8 +21,9 @@ def solve_captcha():
         'bg': '!ISegJw7IAAX6VNIG-kcr408_o3JpR11oxxTqxgu42wcAAAJYVwAAAA1tAQecBCxAHDzp2L_mh1jiuDnsJ-BKiJr38FdfWlB3C79cr9K2Ypp27d505UDb6P7o7Fc8jaJ2z_6fTysIK3WgT1himbjBJwbrtVDVAMYxeMSpfJBVc3OBz29Pd8c5Z3DcXMqOSiziqUgsoTrHB4Jo_8WM2ij1GqoqvCgRCDs7k1pmhg0ytT4is8h5yH2x0XtI2TtZXS7IGA3uJg2R587ieaRWbYv5x3NXR7uD8TXGl1FPXmUVxCod04vSv_cv2vAw1TC0YU3cGh_6vc8FeSqajX5mxDO4Wy52QqVvg6-EiDqJUqH3AbL3_UW54tphxCIRVgQmuYb3F7kmL8FLQieKGSApE9mka_997W5miBkCrQH9YQKZV-iq-LjS2ZocTR1Ci3YgSedNZ16NEqu9xmkA78et7mIezm6OzN-r33t7oor5578IeaviSScaB5AlGQpW5pc6Jk9sqjNFezpIE0e1mQhnpgbL2JAR4RGhGSIi5FjjHl9YPPBoabOtvX39oVI6D-3ap1WrHKCvNsWiUQuDRuo790bXYuc--vyT5gbmfd7OHLWFClX5F6UWKp7bPrRLaocQ_XXdqusHHHfcMnC1eECanTqvz-1xSXVGsetk4Mb4avLF0OLdy2oMXvRFuNcJQBosfQNyGAVU1pPVsE-TZF1NE7IF40a1FS7ZnNQ9YgAul7BUHeo9iGP5uqRhdUT0oH-3jlns6JxqUyG8SkH6Qd9sasZs8_efNXGUjUQnYAdfnVc7wOAsquFBEBOeGooPkxrGkZtfCYvEKiUNmmqi5C5oaQtJXxAGRbrH45lFHjiB29IWzz4URp7P6r2puJQY9XmwGqVdeOBRt4njfzzzTWaIj6cs7YwU3Fi7PKvVstpB-5yCdHTplk8xCcWLX-iT4C6m0wouXQdc0Sij5_CjFTKXIQ3odERk0KvgZytqdH6lwHMe3vq977-xBVLrZfOtH4b9kdnTs_4ydhPT1CUo0hcJAqjObK-5kjbiYSjt3JAP7_1pbZKNFaE0gx-NXUYtfPGVlLgA4bg9WQpNXmS7k8H9DYFavSP7fa_dr1s4zc0NjqpszrTsPzeVT5PgZTllbVJlBTGcoapbKK1x4ucuxay3J_UMI988pQ_sX5HetwGZY1mR2JpFzz1-YEf5e0Ny7JYtCuhjKrNhPWTAOjM4ggXGV7jkKeUsqesuC4TdS7TgI8GTRMWpKR0NXfkBUZJAVCneWJ_cXPumWbGAvmtCwHvsb6MiviBDGZO10vn8EkyHApHWYj3LZbyQycBShRrkoGJEVz7xWSER19lN_IZepTzzfb53ciNRTlQpYc2-9qoL8nCH2VtMPVN5poAHxKPfBCNutP_2b7_ARlpsT18NX7A_KMYYk4hKsIhbVSJg5ejqRbmHDKdQA7BgBXbOexO61F366uMq_yykMQ2d2OAxuHg'
     }
     requests.post(captcha_url, data=data)
+    time.sleep(5)
     requests.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8HlQBVm-JGK2duoKE3ZuMyLCJlIWZREp-si63W_3aEbXP7wZcKs7xcXykitMHtNScyLBxhAZkUqee5nRaHvYwRa4luH9Z9TBdilrjIJuRxVtf8StvKjKwWHXeM48ruVa4xxopVBk6VehW3sWyLOeqng_Fz904xm5ETv-kPSLpVpYeNrcVYAFriy9lFCL4_z9UE4WH3hJysgj7D2vuBIj02s0FmO8KXeQio93CIgdNlnDuVnDvFhV4ibC7favunH7cSzhaHD86REvrJJstVP7j3PYzX3a-Qr65OLziD3Mem9hDRC9xSI5G8TEcE8tdHpkplJPe0yOmkC3eztfsperIIp23aC-Hi0N-NREpCQjcjZhIiME7JikonssKly5HRUPxi-8QtOUL0XooJOQSoOtkeMrP9pWkRQiQQHpuJOwXGNhxxV_nzY'})
-
+    time.sleep(5)
 
 def create_urls(url) -> list:
     categories = ['construccion', 'reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
@@ -60,15 +62,19 @@ for url in urls:
                 company_url = soup.find("a", {"title": "Página web"}).get('href')
             except:
                 company_url = ""
-            data = {'normalized_name': f'{contact_id_name}'}
+            data_load = {'normalized_name': f'{contact_id_name}'}
             del soup
 
-            response = requests.post(ajax_url, data=data)
+            response = requests.post(ajax_url, data=data_load)
             soup = BeautifulSoup(response.text, 'html.parser')
             if soup.find("span", {"class":"msg"}):
                 solve_captcha()
+                response = requests.post(ajax_url, data=data_load)
+                soup = BeautifulSoup(response.text, 'html.parser')
             else:
-                phone = soup.find_all("a", {"class":"phone btn btn-md btn-primary btn-icon"})
+                response = requests.post(ajax_url, data=data_load)
+                soup = BeautifulSoup(response.text, 'html.parser')
+
             phone = soup.find_all("a", {"class": "phone btn btn-md btn-primary btn-icon"})
             phone_list = []
             for p in phone:
@@ -85,7 +91,11 @@ for url in urls:
             print(service)
 
             print("####################")
-        print(f"#####PAGE {a}#####")
+        print(f""
+              f""
+              f""
+              f""
+              f"#####PAGE {a}#####")
 
 
 # url = 'https://empresas.habitissimo.es/do_ajax/business_modal_phone'
