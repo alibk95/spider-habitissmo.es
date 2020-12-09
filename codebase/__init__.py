@@ -4,7 +4,10 @@ from bs4 import BeautifulSoup
 
 base_url = "https://empresas.habitissimo.es/"
 ajax_url = "https://empresas.habitissimo.es/do_ajax/business_modal_phone"
-
+https://www.google.com/recaptcha/api2/userverify?k=6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm
+googlekey = "6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm"
+api_key = "c44e7e216f79b38a6f84e497191ca830"
+api_url = f'https://2captcha.com/in.php?key={api_key}method=userrecaptcha&googlekey={googlekey}&json=1'
 def create_urls(url) -> list:
     categories = ['construccion', 'reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
     url_list = []
@@ -37,19 +40,22 @@ for url in urls:
             page = requests.get(title_url)
             soup = BeautifulSoup(page.text, 'html.parser')
             contact_id_name = soup.find("a", {"id": "show_phone"}).get('data-name')
+            company_url = soup.find("a", {"title": "Página web"}).get('href')
             data = {'normalized_name': f'{contact_id_name}'}
             del soup
 
             response = requests.post(ajax_url, data=data)
             soup = BeautifulSoup(response.text, 'html.parser')
-            phone1 = soup.find("a", {"class":"phone btn btn-md btn-primary btn-icon"}).text.strip()
-            phone2 = soup.find("a", {"class":"whatsapp button-social-share share-whatsapp"}).text.strip()
+            phone = soup.find_all("a", {"class":"phone btn btn-md btn-primary btn-icon"})
+
+            phone_list = []
+            for p in phone:
+                phone_list.append(p.text.strip())
+
             del soup
             del page
-
-            print(phone1)
-            print(phone2)
-            print(response)
+            print(company_url)
+            print(phone_list)
             print(title)
             print(title_url)
             print(rating)
