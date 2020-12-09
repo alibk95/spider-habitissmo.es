@@ -25,21 +25,21 @@ def solve_captcha():
     requests.post(captcha_url, data=data)
     time.sleep(5)
     requests.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8HlQBVm-JGK2duoKE3ZuMyLCJlIWZREp-si63W_3aEbXP7wZcKs7xcXykitMHtNScyLBxhAZkUqee5nRaHvYwRa4luH9Z9TBdilrjIJuRxVtf8StvKjKwWHXeM48ruVa4xxopVBk6VehW3sWyLOeqng_Fz904xm5ETv-kPSLpVpYeNrcVYAFriy9lFCL4_z9UE4WH3hJysgj7D2vuBIj02s0FmO8KXeQio93CIgdNlnDuVnDvFhV4ibC7favunH7cSzhaHD86REvrJJstVP7j3PYzX3a-Qr65OLziD3Mem9hDRC9xSI5G8TEcE8tdHpkplJPe0yOmkC3eztfsperIIp23aC-Hi0N-NREpCQjcjZhIiME7JikonssKly5HRUPxi-8QtOUL0XooJOQSoOtkeMrP9pWkRQiQQHpuJOwXGNhxxV_nzY'})
-    time.sleep(5)
+    time.sleep(4)
 
-first_time = False
-def write_csv(title, phone_list, service, company_url, city, rating, first_time):
+
+def write_csv(title, phone_list, service, company_url, city, rating):
     with open(r'output.csv', 'a', newline='') as csvfile:
             fieldnames = ['company_name', 'phone_list', 'service', 'source', 'company_url', 'city', 'rating',
                           'country_code', 'country']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            if first_time == True:
+            if csvfile.tell() == 0:
                 writer.writeheader()
+
             writer.writerow({'company_name': title, 'phone_list': phone_list, 'service': service,
                              'source': "habitissmo.es", 'company_url': company_url, 'city': city, 'rating': rating,
                              'country_code': "ES",
                              'country': "Spain"})
-    first_time = False
 
 def create_urls(url) -> list:
     categories = ['construccion', 'reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
@@ -74,12 +74,18 @@ for url in urls:
         for article in articles:
             title = article.find("div", {"class": "business-name"}).text.strip()
             title_url = article.find("div", {"class": "business-name"}).a.get('href')
-            rating = article.find("span", {"class": "rating-number t-sm hidden-xs"}).text.strip()
-            city = article.find("div", {"class": "business-working-meta"}).a.text.strip()
-            service = article.find("div", {"class": "business-services"}).div.a.text.strip()
-
-
-
+            try:
+                rating = article.find("span", {"class": "rating-number t-sm hidden-xs"}).text.strip()
+            except:
+                rating = ""
+            try:
+                city = article.find("div", {"class": "business-working-meta"}).a.text.strip()
+            except:
+                city = ""
+            try:
+                service = article.find("div", {"class": "business-services"}).div.a.text.strip()
+            except:
+                service = ""
             page = requests.get(title_url)
             soup = BeautifulSoup(page.text, 'html.parser')
             contact_id_name = soup.find("a", {"id": "show_phone"}).get('data-name')
@@ -117,7 +123,7 @@ for url in urls:
             print(rating)
             print(city)
             print(service)
-            write_csv(title, phone_list, service, company_url, city, rating, first_time)
+            write_csv(title, phone_list, service, company_url, city, rating)
             print("####################")
 
 
