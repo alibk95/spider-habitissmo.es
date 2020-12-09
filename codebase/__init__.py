@@ -85,10 +85,12 @@ for url in urls:
             response = requests.post(ajax_url, data=data_load)
             soup = BeautifulSoup(response.text, 'html.parser')
             if soup.find("span", {"class":"msg"}):
+                del soup
                 solve_captcha()
                 response = requests.post(ajax_url, data=data_load)
                 soup = BeautifulSoup(response.text, 'html.parser')
             else:
+                del soup
                 response = requests.post(ajax_url, data=data_load)
                 soup = BeautifulSoup(response.text, 'html.parser')
 
