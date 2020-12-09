@@ -3,12 +3,11 @@ from bs4 import BeautifulSoup
 import time
 import csv
 
+# website base url
 base_url = "https://empresas.habitissimo.es/"
 # the url to send POST request for solving the recpatcha
 ajax_url = "https://empresas.habitissimo.es/do_ajax/business_modal_phone"
 
-# googlekey = "6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm"
-# api_key = "c44e7e216f79b38a6f84e497191ca830"
 
 
 def solve_captcha():
