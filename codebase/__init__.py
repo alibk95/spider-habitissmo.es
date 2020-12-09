@@ -1,12 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+import csv
 
 base_url = "https://empresas.habitissimo.es/"
+# the url to send POST request for solving the recpatcha
 ajax_url = "https://empresas.habitissimo.es/do_ajax/business_modal_phone"
 
-googlekey = "6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm"
-api_key = "c44e7e216f79b38a6f84e497191ca830"
+# googlekey = "6LevSB0TAAAAAMeozttqborfeQU27GDO6kiSOsEm"
+# api_key = "c44e7e216f79b38a6f84e497191ca830"
 
 
 def solve_captcha():
@@ -25,6 +27,20 @@ def solve_captcha():
     requests.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8HlQBVm-JGK2duoKE3ZuMyLCJlIWZREp-si63W_3aEbXP7wZcKs7xcXykitMHtNScyLBxhAZkUqee5nRaHvYwRa4luH9Z9TBdilrjIJuRxVtf8StvKjKwWHXeM48ruVa4xxopVBk6VehW3sWyLOeqng_Fz904xm5ETv-kPSLpVpYeNrcVYAFriy9lFCL4_z9UE4WH3hJysgj7D2vuBIj02s0FmO8KXeQio93CIgdNlnDuVnDvFhV4ibC7favunH7cSzhaHD86REvrJJstVP7j3PYzX3a-Qr65OLziD3Mem9hDRC9xSI5G8TEcE8tdHpkplJPe0yOmkC3eztfsperIIp23aC-Hi0N-NREpCQjcjZhIiME7JikonssKly5HRUPxi-8QtOUL0XooJOQSoOtkeMrP9pWkRQiQQHpuJOwXGNhxxV_nzY'})
     time.sleep(5)
 
+first_time = False
+def write_csv(title, phone_list, service, company_url, city, rating, first_time):
+    with open(r'output.csv', 'a', newline='') as csvfile:
+            fieldnames = ['company_name', 'phone_list', 'service', 'source', 'company_url', 'city', 'rating',
+                          'country_code', 'country']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            if first_time == True:
+                writer.writeheader()
+            writer.writerow({'company_name': title, 'phone_list': phone_list, 'service': service,
+                             'source': "habitissmo.es", 'company_url': company_url, 'city': city, 'rating': rating,
+                             'country_code': "ES",
+                             'country': "Spain"})
+    first_time = False
+
 def create_urls(url) -> list:
     categories = ['construccion', 'reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
     url_list = []
@@ -37,6 +53,7 @@ urls = create_urls(base_url)
 for url in urls:
     a = 1
     while True:
+        print(f"           #####PAGE {a}#####           ")
         url_in_page = url+f"/{a}?"
         a = a + 1
 
@@ -89,13 +106,8 @@ for url in urls:
             print(rating)
             print(city)
             print(service)
-
+            write_csv(title, phone_list, service, company_url, city, rating, first_time)
             print("####################")
-        print(f""
-              f""
-              f""
-              f""
-              f"#####PAGE {a}#####")
 
 
 # url = 'https://empresas.habitissimo.es/do_ajax/business_modal_phone'
