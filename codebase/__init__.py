@@ -52,14 +52,23 @@ def create_urls(url) -> list:
 urls = create_urls(base_url)
 for url in urls:
     a = 1
-    while True:
+    while a < 200:
+
         print(f"           #####PAGE {a}#####           ")
         url_in_page = url+f"/{a}?"
+        print(url_in_page)
         a = a + 1
 
         page = requests.get(url_in_page)
+        if page.status_code == 404:
+            break
+
         soup = BeautifulSoup(page.text, 'html.parser')
-        articles = soup.find_all("article", {"class": "preview-business premium"})
+
+        try:
+            articles = soup.find_all("article", {"class": "preview-business premium"})
+        except:
+            articles = soup.find_all("article", {"class": "preview-business business"})
         del soup
         del page
         for article in articles:
