@@ -94,8 +94,8 @@ def solve_captcha():
     time.sleep(4)
 
 
-def write_csv(title, phone_list, service, company_url, city, rating):
-    fieldnames = ['company_name', 'phone_list', 'service', 'source', 'company_url', 'city', 'rating',
+def write_csv(title, phone1, phone2, service, company_url, city, rating):
+    fieldnames = ['company_name', 'phone1', 'phone2', 'service', 'source', 'company_url', 'city', 'rating',
                   'country_code', 'country']
     with open(r'output.csv', 'a', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -103,7 +103,7 @@ def write_csv(title, phone_list, service, company_url, city, rating):
         if csvfile.tell() == 0:
             writer.writeheader()
 
-        writer.writerow({'company_name': title, 'phone_list': phone_list, 'service': service, 'source': "habitissmo.es",
+        writer.writerow({'company_name': title, 'phone1': phone1, 'phone2': phone2, 'service': service, 'source': "habitissmo.es",
                          'company_url': company_url, 'city': city, 'rating': rating, 'country_code': "ES",
                          'country': "Spain"})
 
@@ -200,15 +200,25 @@ for url in urls:
             phone_list = []
             for p in phone:
                 phone_list.append(p.text.strip())
+            if len(phone_list) == 2:
+                phone1 = phone_list[0]
+                phone2 = phone_list[1]
+            elif len(phone_list) == 1:
+                phone1 = phone_list[0]
+                phone2 = ""
+            else:
+                phone1 = ""
+                phone2 = ""
             # very critical !
             del soup
             del page
 
             print(title)
-            print(phone_list)
+            print(phone1)
+            print(phone2)
             print(company_url)
             print(rating)
             print(city)
             print(service)
-            write_csv(title, phone_list, service, company_url, city, rating)
+            write_csv(title, phone1, phone2, service, company_url, city, rating)
             print("####################")
