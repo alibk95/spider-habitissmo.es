@@ -25,6 +25,28 @@ http.mount("https://", adapter)
 http.mount("http://", adapter)
 
 
+# Posting to a Slack channel
+def send_message_to_slack(text):
+    """
+    function to send a slack massage to your desired channel.
+    """
+    from urllib import request, parse
+    import json
+
+    post = {"text": "{0}".format(text)}
+
+    try:
+        json_data = json.dumps(post)
+        # copy paste your webhook url from the slack to the text file
+        with open('text.txt', 'r') as file:
+            hook = file.read()
+        req = request.Request(hook,
+                              data=json_data.encode('ascii'),
+                              headers={'Content-Type': 'application/json'})
+        resp = request.urlopen(req)
+    except Exception as em:
+        print("EXCEPTION: " + str(em))
+
 
 def solve_captcha():
     """
@@ -86,11 +108,15 @@ def solve_captcha():
               'N_IZepTzzfb53ciNRTlQpYc2-9qoL8nCH2VtMPVN5poAHxKPfBCNutP_2b7_ARlpsT18NX7A_KMYYk4hKsIhbVSJg5ejqRbmHDKdQA7B'
               'gBXbOexO61F366uMq_yykMQ2d2OAxuHg'
     }
-    http.post(captcha_url, data=data, timeout=20)
+    try:
+        http.post(captcha_url, data=data, timeout=20)
+    except Exception:
+        send_message_to_slack("ERROR just happened")
     # To give some time to the recaptcha to load
     time.sleep(3)
-    http.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", timeout=20,
-                  data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8'
+    try:
+        http.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", timeout=20,
+                data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8'
                                                                                           'HlQBVm-JGK2duoKE3ZuMyLCJlIWZ'
                                                                                           'REp-si63W_3aEbXP7wZcKs7xcXyk'
                                                                                           'itMHtNScyLBxhAZkUqee5nRaHvYw'
@@ -107,6 +133,8 @@ def solve_captcha():
                                                                                           'iME7JikonssKly5HRUPxi-8QtOUL'
                                                                                           '0XooJOQSoOtkeMrP9pWkRQiQQHpu'
                                                                                           'JOwXGNhxxV_nzY'})
+    except Exception:
+        send_message_to_slack("ERROR just happened")
     time.sleep(3)
 
 
@@ -130,7 +158,8 @@ def create_urls(url) -> list:
     of different services and the scraper needs to go in each of the urls and scrape the pages till end.
     :return: list of high level url's
     """
-    categories = ['construccion', 'reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
+    # done = 'construccion'
+    categories = ['reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
     url_list = []
     for cat in categories:
         url_list.append(url+cat)
@@ -140,18 +169,21 @@ def create_urls(url) -> list:
 urls = create_urls(base_url)
 # Main loop
 for url in urls:
-    a = 107
+    a = 45
     # max 200 pages of each service are useful for us as the rest are not providing any contact info's.
-    while a < 170:
-
+    while a < 200:
         print(f"           #####PAGE {a}#####           ")
         # The structure of the url address bar is changing in each page as below. e.g. a = 1 : page 1 a = 2 : page 2
         url_in_page = url+f"/{a}?"
         print(url_in_page)
         a = a + 1
         # Check if we reached to the end of the pages for each service and break the loop there.
-        page = http.get(url_in_page, timeout=20)
-        print(page.status_code)
+        try:
+            page = http.get(url_in_page, timeout=20)
+            print(page.status_code)
+        except Exception:
+            send_message_to_slack("ERROR just happened")
+
         if page.status_code == 404:
             break
         # Making the soup :  )
@@ -189,7 +221,10 @@ for url in urls:
                 service = ""
 
             # to retrieve the contact info and webpages we need to enter to each article website
-            page = http.get(title_url, timeout=20)
+            try:
+                page = http.get(title_url, timeout=20)
+            except Exception:
+                send_message_to_slack("ERROR just happened")
             # again make a soup here
             soup = BeautifulSoup(page.text, 'html.parser')
             # this needs to retrieved in order to later use it for getting the contact details from the Modal.
@@ -206,18 +241,27 @@ for url in urls:
                 data_load = {'normalized_name': f'{contact_id_name}'}
 
                 # This POST request is basically means that push the contact button to open the popup of contact details.
-                response = http.post(ajax_url, data=data_load, timeout=20)
+                try:
+                    response = http.post(ajax_url, data=data_load, timeout=20)
+                except Exception:
+                    send_message_to_slack("ERROR just happened")
                 # again making a soup from that modal
                 soup = BeautifulSoup(response.text, 'html.parser')
                 # If it contains this span it means that the recaptcha is just appeared and we need to solve it.
                 if soup.find("span", {"class":"msg"}):
                     del soup
                     solve_captcha()
-                    response = http.post(ajax_url, data=data_load, timeout=20)
+                    try:
+                        response = http.post(ajax_url, data=data_load, timeout=20)
+                    except Exception:
+                        send_message_to_slack("ERROR just happened")
                     soup = BeautifulSoup(response.text, 'html.parser')
                 else:
                     del soup
-                    response = http.post(ajax_url, data=data_load, timeout=20)
+                    try:
+                        response = http.post(ajax_url, data=data_load, timeout=20)
+                    except Exception:
+                        send_message_to_slack("ERROR just happened")
                     soup = BeautifulSoup(response.text, 'html.parser')
                 # we came all this way to reach this phone number :  ))
                 # Since there might be more than one phone number we push them in a list.
