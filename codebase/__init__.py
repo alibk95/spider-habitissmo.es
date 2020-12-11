@@ -72,7 +72,7 @@ def solve_captcha():
     }
     requests.post(captcha_url, data=data)
     # To give some time to the recaptcha to load
-    time.sleep(5)
+    time.sleep(3)
     requests.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone",
                   data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8'
                                                                                           'HlQBVm-JGK2duoKE3ZuMyLCJlIWZ'
@@ -91,7 +91,7 @@ def solve_captcha():
                                                                                           'iME7JikonssKly5HRUPxi-8QtOUL'
                                                                                           '0XooJOQSoOtkeMrP9pWkRQiQQHpu'
                                                                                           'JOwXGNhxxV_nzY'})
-    time.sleep(4)
+    time.sleep(3)
 
 
 def write_csv(title, phone1, phone2, service, company_url, city, rating):
@@ -124,9 +124,9 @@ def create_urls(url) -> list:
 urls = create_urls(base_url)
 # Main loop
 for url in urls:
-    a = 1
+    a = 24
     # max 200 pages of each service are useful for us as the rest are not providing any contact info's.
-    while a < 200:
+    while a < 170:
 
         print(f"           #####PAGE {a}#####           ")
         # The structure of the url address bar is changing in each page as below. e.g. a = 1 : page 1 a = 2 : page 2
@@ -135,6 +135,7 @@ for url in urls:
         a = a + 1
         # Check if we reached to the end of the pages for each service and break the loop there.
         page = requests.get(url_in_page)
+        print(page.status_code)
         if page.status_code == 404:
             break
         # Making the soup :  )
@@ -143,7 +144,11 @@ for url in urls:
         try:
             # articles are the sections that businesses are laying their infos. Basically each page has around 30
             # articles and each contains infos about the specific business.
+
             articles = soup.find_all("article", {"class": "preview-business premium"})
+            if not articles:
+                articles = soup.find_all("article", {"class": "preview-business business"})
+
         except:
             articles = soup.find_all("article", {"class": "preview-business business"})
         # this is extremely important to take care of the garbage collection on python and delete the objects that we
@@ -172,45 +177,53 @@ for url in urls:
             # again make a soup here
             soup = BeautifulSoup(page.text, 'html.parser')
             # this needs to retrieved in order to later use it for getting the contact details from the Modal.
-            contact_id_name = soup.find("a", {"id": "show_phone"}).get('data-name')
-
+            try:
+                contact_id_name = soup.find("a", {"id": "show_phone"}).get('data-name')
+            except:
+                contact_id_name = ""
             try:
                 company_url = soup.find("a", {"title": "Página web"}).get('href')
             except:
                 company_url = ""
-            data_load = {'normalized_name': f'{contact_id_name}'}
             del soup
-            # This POST request is basically means that push the contact button to open the popup of contact details.
-            response = requests.post(ajax_url, data=data_load)
-            # again making a soup from that modal
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # If it contains this span it means that the recaptcha is just appeared and we need to solve it.
-            if soup.find("span", {"class":"msg"}):
-                del soup
-                solve_captcha()
+            if contact_id_name != "":
+                data_load = {'normalized_name': f'{contact_id_name}'}
+
+                # This POST request is basically means that push the contact button to open the popup of contact details.
                 response = requests.post(ajax_url, data=data_load)
+                # again making a soup from that modal
                 soup = BeautifulSoup(response.text, 'html.parser')
-            else:
+                # If it contains this span it means that the recaptcha is just appeared and we need to solve it.
+                if soup.find("span", {"class":"msg"}):
+                    del soup
+                    solve_captcha()
+                    response = requests.post(ajax_url, data=data_load)
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                else:
+                    del soup
+                    response = requests.post(ajax_url, data=data_load)
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                # we came all this way to reach this phone number :  ))
+                # Since there might be more than one phone number we push them in a list.
+                phone = soup.find_all("a", {"class": "phone btn btn-md btn-primary btn-icon"})
                 del soup
-                response = requests.post(ajax_url, data=data_load)
-                soup = BeautifulSoup(response.text, 'html.parser')
-            # we came all this way to reach this phone number :  ))
-            # Since there might be more than one phone number we push them in a list.
-            phone = soup.find_all("a", {"class": "phone btn btn-md btn-primary btn-icon"})
-            phone_list = []
-            for p in phone:
-                phone_list.append(p.text.strip())
-            if len(phone_list) == 2:
-                phone1 = phone_list[0]
-                phone2 = phone_list[1]
-            elif len(phone_list) == 1:
-                phone1 = phone_list[0]
-                phone2 = ""
+                phone_list = []
+                for p in phone:
+                    phone_list.append(p.text.strip())
+                if len(phone_list) == 2:
+                    phone1 = phone_list[0]
+                    phone2 = phone_list[1]
+                elif len(phone_list) == 1:
+                    phone1 = phone_list[0]
+                    phone2 = ""
+                else:
+                    phone1 = ""
+                    phone2 = ""
             else:
                 phone1 = ""
                 phone2 = ""
+
             # very critical !
-            del soup
             del page
 
             print(title)
