@@ -2,11 +2,27 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import csv
+from requests.adapters import HTTPAdapter
 
 # website base url
 base_url = "https://empresas.habitissimo.es/"
 # the url to send POST request for solving the recpatcha
 ajax_url = "https://empresas.habitissimo.es/do_ajax/business_modal_phone"
+
+
+
+# https://findwork.dev/blog/advanced-usage-python-requests-timeouts-retries-hooks/
+# To handle the max retry error in requests the below strategy is used.
+from requests.packages.urllib3.util.retry import Retry
+retry_strategy = Retry(
+    total=3,
+    status_forcelist=[429, 500, 502, 503, 504],
+    method_whitelist=["HEAD", "GET", "OPTIONS"]
+)
+adapter = HTTPAdapter(max_retries=retry_strategy)
+http = requests.Session()
+http.mount("https://", adapter)
+http.mount("http://", adapter)
 
 
 
@@ -70,10 +86,10 @@ def solve_captcha():
               'N_IZepTzzfb53ciNRTlQpYc2-9qoL8nCH2VtMPVN5poAHxKPfBCNutP_2b7_ARlpsT18NX7A_KMYYk4hKsIhbVSJg5ejqRbmHDKdQA7B'
               'gBXbOexO61F366uMq_yykMQ2d2OAxuHg'
     }
-    requests.post(captcha_url, data=data, timeout=10)
+    http.post(captcha_url, data=data, timeout=20)
     # To give some time to the recaptcha to load
     time.sleep(3)
-    requests.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", timeout=10,
+    http.post("https://empresas.habitissimo.es/do_ajax/business_modal_phone", timeout=20,
                   data={'normalized_name':'espacio-de-interiorismo-y-urbana', 'recaptcha':'03AGdBq27T4pEo3xIkH4V82YyGA8'
                                                                                           'HlQBVm-JGK2duoKE3ZuMyLCJlIWZ'
                                                                                           'REp-si63W_3aEbXP7wZcKs7xcXyk'
@@ -124,7 +140,7 @@ def create_urls(url) -> list:
 urls = create_urls(base_url)
 # Main loop
 for url in urls:
-    a = 100
+    a = 107
     # max 200 pages of each service are useful for us as the rest are not providing any contact info's.
     while a < 170:
 
@@ -134,7 +150,7 @@ for url in urls:
         print(url_in_page)
         a = a + 1
         # Check if we reached to the end of the pages for each service and break the loop there.
-        page = requests.get(url_in_page, timeout=10)
+        page = http.get(url_in_page, timeout=20)
         print(page.status_code)
         if page.status_code == 404:
             break
@@ -173,7 +189,7 @@ for url in urls:
                 service = ""
 
             # to retrieve the contact info and webpages we need to enter to each article website
-            page = requests.get(title_url, timeout=10)
+            page = http.get(title_url, timeout=20)
             # again make a soup here
             soup = BeautifulSoup(page.text, 'html.parser')
             # this needs to retrieved in order to later use it for getting the contact details from the Modal.
@@ -190,18 +206,18 @@ for url in urls:
                 data_load = {'normalized_name': f'{contact_id_name}'}
 
                 # This POST request is basically means that push the contact button to open the popup of contact details.
-                response = requests.post(ajax_url, data=data_load, timeout=10)
+                response = http.post(ajax_url, data=data_load, timeout=20)
                 # again making a soup from that modal
                 soup = BeautifulSoup(response.text, 'html.parser')
                 # If it contains this span it means that the recaptcha is just appeared and we need to solve it.
                 if soup.find("span", {"class":"msg"}):
                     del soup
                     solve_captcha()
-                    response = requests.post(ajax_url, data=data_load, timeout=10)
+                    response = http.post(ajax_url, data=data_load, timeout=20)
                     soup = BeautifulSoup(response.text, 'html.parser')
                 else:
                     del soup
-                    response = requests.post(ajax_url, data=data_load, timeout=10)
+                    response = http.post(ajax_url, data=data_load, timeout=20)
                     soup = BeautifulSoup(response.text, 'html.parser')
                 # we came all this way to reach this phone number :  ))
                 # Since there might be more than one phone number we push them in a list.
