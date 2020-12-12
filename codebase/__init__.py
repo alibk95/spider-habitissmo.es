@@ -158,8 +158,8 @@ def create_urls(url) -> list:
     of different services and the scraper needs to go in each of the urls and scrape the pages till end.
     :return: list of high level url's
     """
-    # done = 'construccion'
-    categories = ['reformas', 'mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
+    # done = 'construccion' 'reformas',
+    categories = ['mudanzas', 'obras-menores', 'instaladores', 'mantenimiento', 'tiendas']
     url_list = []
     for cat in categories:
         url_list.append(url+cat)
@@ -169,7 +169,7 @@ def create_urls(url) -> list:
 urls = create_urls(base_url)
 # Main loop
 for url in urls:
-    a = 45
+    a = 58
     # max 200 pages of each service are useful for us as the rest are not providing any contact info's.
     while a < 200:
         print(f"           #####PAGE {a}#####           ")
@@ -229,7 +229,8 @@ for url in urls:
             soup = BeautifulSoup(page.text, 'html.parser')
             # this needs to retrieved in order to later use it for getting the contact details from the Modal.
             try:
-                contact_id_name = soup.find("a", {"id": "show_phone"}).get('data-name')
+                contact_id_name = soup.find("aside", {"id": "business-sidebar-contact-info"})
+                contact_id_name = contact_id_name.find("a", {"id":"show_phone"}).get('data-name')
             except:
                 contact_id_name = ""
             try:
